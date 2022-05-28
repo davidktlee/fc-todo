@@ -6,6 +6,8 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reset-css@5.0.1/reset.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" />
+
     <title>KT-DO</title>
   </head>
 
@@ -15,19 +17,29 @@
         <img src="./img/88472041-to-do-list-hand-drawn-lettering-inscription-for-christmas-and-new-year-checklist-isolated-on-the-whi.webp" alt="logo" width="100px" />
       </div>
       <div class="header-title">
-        KT-DO LIST
+        KTO-DO LIST
       </div>
+      <a class="material-symbols-outlined" href="https://github.com/davidktlee">
+        badge
+      </a>
     </header>
     <main>
       <div class="inner">
-        <form>
-          <div class="form-title">ADD TODO</div>
-          <input class="form-input" />
-
-          <button>추가</button>
-        </form>
+        <div class="input-container">
+          <form>
+            <div class="form-title">ADD TODO</div>
+            <input class="form-input" />
+            <button class="btn__add">추가</button>
+          </form>
+        </div>
+        <div class="content-container">
+          <div class="content-title">List</div>
+          <div class="content-list">
+            <ul>
+            </ul>
+          </div>
+        </div>
       </div>
-      <div class="container"></div>
     </main>
   </body>
 
