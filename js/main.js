@@ -11,6 +11,8 @@ const todoUlEl = document.querySelector('.content-list ul')
 const textArea = document.createElement('input')
 let order = 0
 let textBoolean = false
+let boolean = false
+let value
 
 // CONSTANT
 const URL = 'https://asia-northeast3-heropy-api.cloudfunctions.net/api/todos'
@@ -72,7 +74,24 @@ async function deleteTodo(id) {
   fetchTodo()
 }
 // PUT
-async function putTodo(param) {
+async function putTodoBoolean(boolean, id, value) {
+  const { data } = await axios({
+    url: `${URL}/${id}`,
+    method: 'PUT',
+    headers: {
+      'content-type': 'application/json',
+      apikey: API_KEY,
+      username: USERNAME,
+    },
+    data: {
+      title: value,
+      order,
+      done: boolean,
+    },
+  })
+  fetchTodo()
+}
+async function putTodoTitle(param) {
   const { id, value, done } = param
   const { data } = await axios({
     url: `${URL}/${id}`,
@@ -87,8 +106,7 @@ async function putTodo(param) {
       done: done,
     },
   })
-
-  renderTodo(data)
+  fetchTodo()
 }
 
 formEl.addEventListener('submit', submitTodo)
@@ -119,16 +137,16 @@ function renderTodo(todos) {
     todoItem.setAttribute('id', todo.id)
     const todoText = document.createElement('div')
     todoText.textContent = todo.title
+    value = todo.title
     const checkBox = document.createElement('input')
     checkBox.setAttribute('type', 'checkbox')
-    let boolean = false
     checkBox.setAttribute('checked', boolean)
-    checkBox.checked = false
+    checkBox.checked = boolean
     checkBox.addEventListener('click', () => {
       todoText.classList.toggle('checked')
       boolean = !boolean
       checkBox.setAttribute('checked', boolean)
-      doneTodo({ done: boolean, id: todo.id })
+      putTodoBoolean(boolean, todo.id, value)
     })
     const modifyBtn = document.createElement('button')
     modifyBtn.setAttribute('class', 'modify-btn')
@@ -136,7 +154,9 @@ function renderTodo(todos) {
     const deleteBtn = document.createElement('button')
     deleteBtn.setAttribute('class', 'delete-btn')
     deleteBtn.textContent = '삭제'
-    todoItem.append(checkBox, todoText, modifyBtn, deleteBtn)
+    const updatedTime = document.createElement('span')
+    updatedTime.textContent = `Date: ${todo.updatedAt.slice(0, 10)}`
+    todoItem.append(checkBox, todoText, modifyBtn, deleteBtn, updatedTime)
     todoUlEl.appendChild(todoItem)
   })
   contentList.appendChild(todoUlEl)
@@ -159,33 +179,38 @@ contentList.addEventListener('click', (e) => {
     textBoolean = !textBoolean
     console.log(textBoolean, id)
     if (textBoolean) {
-      renderModal(id)
+      renderModal(id, value)
     }
   }
 })
-function renderModal(id) {
+function renderModal(id, value) {
   const modalContainer = document.createElement('div')
-  modalContainer.classList.add('modal-container')
-  modalContainer.textContent = '수정 사항'
+  modalContainer.classList.add('modal', 'modal-container')
+  const modalTitle = document.createElement('div')
+  modalTitle.textContent = '수정사항'
   const confirmBtn = document.createElement('button')
+  textArea.value = value
   confirmBtn.classList.add('confirm-btn')
   confirmBtn.textContent = '확인'
   const cancelBtn = document.createElement('button')
   cancelBtn.classList.add('cancel-btn')
   cancelBtn.textContent = '취소'
-  modalContainer.append(textArea, confirmBtn, cancelBtn)
+  modalContainer.append(modalTitle, textArea, confirmBtn, cancelBtn)
   console.log('rendered')
-  let value = ''
   textArea.addEventListener('input', (e) => {
     value = e.target.value
     // putTodo({ id, value, done: false })
   })
   modalContainer.addEventListener('click', (e) => {
     if (e.target.className === 'cancel-btn') {
+      modalContainer.classList.remove('modal-container')
+      textBoolean = !textBoolean
     }
     if (e.target.className === 'confirm-btn') {
-      putTodo({ id, value, done: false })
       modalContainer.classList.remove('modal-container')
+      textArea.value = value
+      putTodoTitle({ id, value, done: false })
+      textBoolean = !textBoolean
     }
   })
   contentList.appendChild(modalContainer)
