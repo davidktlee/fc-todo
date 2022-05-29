@@ -11,7 +11,6 @@ const todoUlEl = document.querySelector('.content-list ul')
 const textArea = document.createElement('input')
 let order = 0
 let textBoolean = false
-let boolean = false
 let value
 
 // CONSTANT
@@ -51,9 +50,8 @@ async function fetchTodo() {
       username: USERNAME,
     },
   })
-  console.log(data)
   renderTodo(data)
-
+  console.log(data)
   // data.map((item) => {
   //   deleteTodo(item.id)
   // })
@@ -73,8 +71,8 @@ async function deleteTodo(id) {
   })
   fetchTodo()
 }
-// PUT
-async function putTodoBoolean(boolean, id, value) {
+// PUT done 값
+async function putTodoBoolean(boolean, id, value, order) {
   const { data } = await axios({
     url: `${URL}/${id}`,
     method: 'PUT',
@@ -91,6 +89,7 @@ async function putTodoBoolean(boolean, id, value) {
   })
   fetchTodo()
 }
+// PUT title change
 async function putTodoTitle(param) {
   const { id, value, done } = param
   const { data } = await axios({
@@ -128,7 +127,7 @@ function submitTodo(e) {
     createTodo(value)
   }
 }
-
+// todo render
 function renderTodo(todos) {
   order = todos.order
   resetRender()
@@ -136,17 +135,21 @@ function renderTodo(todos) {
     const todoItem = document.createElement('li')
     todoItem.setAttribute('id', todo.id)
     const todoText = document.createElement('div')
+    if (todo.done === true) {
+      todoText.classList.add('checked')
+    }
     todoText.textContent = todo.title
     value = todo.title
     const checkBox = document.createElement('input')
     checkBox.setAttribute('type', 'checkbox')
+    let boolean = todo.done
     checkBox.setAttribute('checked', boolean)
     checkBox.checked = boolean
     checkBox.addEventListener('click', () => {
       todoText.classList.toggle('checked')
       boolean = !boolean
       checkBox.setAttribute('checked', boolean)
-      putTodoBoolean(boolean, todo.id, value)
+      putTodoBoolean(boolean, todo.id, value, order)
     })
     const modifyBtn = document.createElement('button')
     modifyBtn.setAttribute('class', 'modify-btn')
@@ -183,6 +186,7 @@ contentList.addEventListener('click', (e) => {
     }
   }
 })
+// modal
 function renderModal(id, value) {
   const modalContainer = document.createElement('div')
   modalContainer.classList.add('modal', 'modal-container')
@@ -199,7 +203,6 @@ function renderModal(id, value) {
   console.log('rendered')
   textArea.addEventListener('input', (e) => {
     value = e.target.value
-    // putTodo({ id, value, done: false })
   })
   modalContainer.addEventListener('click', (e) => {
     if (e.target.className === 'cancel-btn') {
@@ -209,18 +212,9 @@ function renderModal(id, value) {
     if (e.target.className === 'confirm-btn') {
       modalContainer.classList.remove('modal-container')
       textArea.value = value
-      putTodoTitle({ id, value, done: false })
       textBoolean = !textBoolean
+      putTodoTitle({ id, value, done: false })
     }
   })
   contentList.appendChild(modalContainer)
 }
-
-// deleteBtn.addEventListener('click' (e)=> {
-//   console.log(e)
-// })
-
-// function onRemoveItem() {
-//   const removeBtn = document.querySelector('.btn__remove')
-//   console.log(removeBtn)
-// }
