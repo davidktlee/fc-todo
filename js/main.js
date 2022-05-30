@@ -9,9 +9,10 @@ const removeBtn = document.querySelector('.btn__remove')
 const modifyBtn = document.querySelector('.btn__modify')
 const todoUlEl = document.querySelector('.content-list ul')
 const textArea = document.createElement('input')
-let order = 0
+const selectInput = document.querySelector('.select-input')
+
+let order = 1
 let textBoolean = false
-let value
 
 // CONSTANT
 const URL = 'https://asia-northeast3-heropy-api.cloudfunctions.net/api/todos'
@@ -48,6 +49,7 @@ async function fetchTodo() {
     headers,
   })
   renderTodo(data)
+  console.log(data)
   // data.map((item) => {
   //   deleteTodo(item.id)
   // })
@@ -91,7 +93,7 @@ async function putTodoBoolean(boolean, id, value, order) {
 }
 // PUT title change
 async function putTodoTitle(param) {
-  const { id, value, done } = param
+  const { id, value, done, order } = param
   const { data } = await axios({
     url: `${URL}/${id}`,
     method: 'PUT',
@@ -103,6 +105,7 @@ async function putTodoTitle(param) {
     data: {
       title: value,
       done: done,
+      order,
     },
   })
   fetchTodo()
@@ -111,6 +114,10 @@ async function putTodoTitle(param) {
 formEl.addEventListener('submit', submitTodo)
 addBtn.addEventListener('submit', submitTodo)
 
+// SELECT 입력
+selectInput.addEventListener('change', (e) => {
+  order = e.target.value
+})
 // Todo 입력
 function submitTodo(e) {
   e.preventDefault()
@@ -120,26 +127,27 @@ function submitTodo(e) {
     inputEl.value = ''
     inputEl.focus()
   } else {
-    let value = {
+    const value = {
       title: inputEl.value,
-      order: (order += 1),
+      order,
     }
     createTodo(value)
   }
 }
 // todo render
 function renderTodo(todos) {
-  order = todos.order
   resetRender()
   todos.map((todo) => {
+    console.log(todo.order)
     const todoItem = document.createElement('li')
     todoItem.setAttribute('id', todo.id)
     const todoText = document.createElement('div')
+    todoText.classList.add('todo-content')
     if (todo.done === true) {
       todoText.classList.add('checked')
     }
     todoText.textContent = todo.title
-    value = todo.title
+    const value = todo.title
     const checkBox = document.createElement('input')
     checkBox.setAttribute('type', 'checkbox')
     let boolean = todo.done
@@ -149,8 +157,20 @@ function renderTodo(todos) {
       todoText.classList.toggle('checked')
       boolean = !boolean
       checkBox.setAttribute('checked', boolean)
-      putTodoBoolean(boolean, todo.id, value, order)
+      console.log(todo.id, value)
+      putTodoBoolean(boolean, todo.id, value, todo.order)
     })
+    const renderSelect = document.createElement('div')
+    if (todo.order === 1) {
+      renderSelect.textContent = '1시간 안에!!!'
+    } else if (todo.order === 2) {
+      renderSelect.textContent = '반나절 안에!!'
+    } else if (todo.order === 3) {
+      renderSelect.textContent = '하루 안에!'
+    } else {
+      renderSelect.textContent = '일주일 안에~'
+    }
+
     const modifyBtn = document.createElement('button')
     modifyBtn.setAttribute('class', 'modify-btn')
     modifyBtn.textContent = '수정'
@@ -160,7 +180,7 @@ function renderTodo(todos) {
     deleteBtn.textContent = '삭제'
     const updatedTime = document.createElement('span')
     updatedTime.textContent = `Date: ${todo.updatedAt.slice(0, 10)}`
-    todoItem.append(checkBox, todoText, modifyBtn, deleteBtn, updatedTime)
+    todoItem.append(checkBox, todoText, modifyBtn, deleteBtn, renderSelect, updatedTime)
     todoUlEl.appendChild(todoItem)
   })
   contentList.appendChild(todoUlEl)
@@ -174,11 +194,12 @@ function resetRender() {
 // delete 로직
 contentList.addEventListener('click', (e) => {
   if (e.target.className === 'delete-btn') {
-    console.log(e.target.parentNode.id)
     deleteTodo(e.target.parentNode.id)
   }
   if (e.target.className === 'modify-btn') {
     // 수정 버튼에 대한 이벤트
+    const id = e.target.parentNode.id
+    const value = e.target.value
     textBoolean = !textBoolean
     if (textBoolean) {
       renderModal(id, value)
@@ -191,6 +212,11 @@ function renderModal(id, value) {
   modalContainer.classList.add('modal', 'modal-container')
   const modalTitle = document.createElement('div')
   modalTitle.textContent = '수정사항'
+  const modifySelect = document.createElement('select')
+  modifySelect.innerHTML = `<option value="1">한시간 안에</option>
+  <option value="2">반나절 안에</option>
+  <option value="3">하루 안에</option>
+  <option value="4">일주일 안에</option>`
   const confirmBtn = document.createElement('button')
   textArea.value = value
   confirmBtn.classList.add('confirm-btn')
@@ -198,9 +224,12 @@ function renderModal(id, value) {
   const cancelBtn = document.createElement('button')
   cancelBtn.classList.add('cancel-btn')
   cancelBtn.textContent = '취소'
-  modalContainer.append(modalTitle, textArea, confirmBtn, cancelBtn)
+  modalContainer.append(modalTitle, textArea, modifySelect, confirmBtn, cancelBtn)
   textArea.addEventListener('input', (e) => {
     value = e.target.value
+  })
+  modifySelect.addEventListener('change', (e) => {
+    order = e.target.value
   })
   modalContainer.addEventListener('click', (e) => {
     if (e.target.className === 'cancel-btn') {
@@ -215,8 +244,10 @@ function renderModal(id, value) {
       modalContainer.classList.remove('modal-container')
       textArea.value = value
       textBoolean = !textBoolean
-      putTodoTitle({ id, value, done: false })
+      console.log(id, value, order)
+      putTodoTitle({ id, value, order, done: false })
     }
   })
+
   contentList.appendChild(modalContainer)
 }
