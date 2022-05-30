@@ -50,8 +50,8 @@ async function fetchTodo() {
     method: 'GET',
     headers,
   })
-  id = data.map((item) => {
-    return item.id
+  id = data.filter((item) => {
+    return item.done === true
   })
   sortRenderTodo(data)
   // data.map((item) => {
@@ -69,10 +69,10 @@ async function deleteTodo(id) {
   })
   fetchTodo()
 }
-
+// DELETE ALL BTN
 deleteAllBtn.addEventListener('click', () => {
   id.forEach((item) => {
-    deleteDoneTodo(item)
+    deleteDoneTodo(item.id)
   })
 })
 // DELETE DONE TODO
@@ -230,7 +230,8 @@ function resetRender() {
 // CLICK BTNS
 contentList.addEventListener('click', (e) => {
   if (e.target.className === 'delete-btn') {
-    deleteTodo(e.target.parentNode.id)
+    console.log(e.target.parentNode)
+    // deleteTodo(e.target.parentNode.id)
   }
   if (e.target.className === 'modify-btn') {
     // 수정 버튼에 대한 이벤트

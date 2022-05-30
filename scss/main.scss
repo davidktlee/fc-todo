@@ -117,8 +117,10 @@ main {
         margin-left: 10px;
       }
       .delete-all {
+        margin-left: 170px;
+        border-radius: 5px;
+        height: 25px;
       }
-
       .content-list {
         margin: 10px;
         ul {
@@ -144,7 +146,7 @@ main {
               padding: 10px;
               // flex-grow: 1;
               white-space: none;
-              border: 3px solid #fff;
+              border: none; /* 3px solid #fff; */
               border-radius: 3px;
               width: 150px;
               &.checked {
