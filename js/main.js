@@ -1,5 +1,5 @@
-const axios = require('axios')
 import '../scss/main.scss'
+import request from './api'
 // VARIABLES
 const formEl = document.querySelector('form')
 const inputEl = document.querySelector('.form-input')
@@ -12,28 +12,62 @@ const textArea = document.createElement('input')
 const selectInput = document.querySelector('.select-input')
 const sortItem = document.querySelector('.sort-item')
 const deleteAllBtn = document.querySelector('.delete-all')
-
 let order = 1
 let textBoolean = false
 let id
 
 // CONSTANT
 const URL = 'https://asia-northeast3-heropy-api.cloudfunctions.net/api/todos'
-const API_KEY = 'FcKdtJs202204'
-const USERNAME = 'KDT2_LeeKyungTaek'
-const headers = {
-  'content-type': 'application/json',
-  apikey: API_KEY,
-  username: USERNAME,
-}
+// const API_KEY = 'FcKdtJs202204'
+// const USERNAME = 'KDT2_LeeKyungTaek'
+// const headers = {
+//   'content-type': 'application/json',
+//   apikey: API_KEY,
+//   username: USERNAME,
+// }
+// 불러오기
+fetchTodo()
+
+// EVENT
+// SUBMIT
+formEl.addEventListener('submit', submitTodo)
+addBtn.addEventListener('submit', submitTodo)
+
+// SELECT INPUT
+selectInput.addEventListener('change', (e) => {
+  order = e.target.value
+})
+
+// DELETE ALL BTN
+deleteAllBtn.addEventListener('click', () => {
+  id.forEach((item) => {
+    deleteDoneTodo(item.id)
+  })
+})
+
+// 이벤트 위임
+contentList.addEventListener('click', (e) => {
+  //삭제 버튼에 대한 이벤트
+  if (e.target.className === 'delete-btn') {
+    console.log(e.target.parentNode)
+    deleteTodo(e.target.parentNode.id)
+  }
+  if (e.target.className === 'modify-btn') {
+    // 수정 버튼에 대한 이벤트
+    const id = e.target.parentNode.id
+    const value = e.target.value
+    textBoolean = !textBoolean
+    if (textBoolean) {
+      renderModal(id, value)
+    }
+  }
+})
 
 // CREATE
 async function createTodo(value) {
   if (!value.title.trim()) return
-  const { data } = await axios({
-    url: URL,
+  const { data } = await request({
     method: 'POST',
-    headers,
     data: {
       // 시용자의 인풋 값
       title: value.title,
@@ -45,57 +79,40 @@ async function createTodo(value) {
 
 // READ
 async function fetchTodo() {
-  const { data } = await axios({
-    url: URL,
+  const { data } = await request({
     method: 'GET',
-    headers,
   })
   id = data.filter((item) => {
     return item.done === true
   })
   sortRenderTodo(data)
-  // data.map((item) => {
-  //   deleteTodo(item.id)
-  // })
 }
-fetchTodo()
+
 // DELETE
 async function deleteTodo(id) {
   // todo id를 받아서 해당 id todo만 삭제
-  const { data } = await axios({
+  const { data } = await request({
     url: `${URL}/${id}`,
     method: 'DELETE',
-    headers,
   })
   fetchTodo()
 }
-// DELETE ALL BTN
-deleteAllBtn.addEventListener('click', () => {
-  id.forEach((item) => {
-    deleteDoneTodo(item.id)
-  })
-})
+
 // DELETE DONE TODO
 async function deleteDoneTodo(id) {
   // todo id를 받아서 해당 id todo만 삭제
-  const { data } = await axios({
+  const { data } = await request({
     url: `${URL}/${id}`,
     method: 'DELETE',
-    headers,
   })
   fetchTodo()
 }
 
 // PUT DONE VALUE
 async function putTodoBoolean(boolean, id, value, order) {
-  const { data } = await axios({
+  const { data } = await request({
     url: `${URL}/${id}`,
     method: 'PUT',
-    headers: {
-      'content-type': 'application/json',
-      apikey: API_KEY,
-      username: USERNAME,
-    },
     data: {
       title: value,
       order,
@@ -104,17 +121,13 @@ async function putTodoBoolean(boolean, id, value, order) {
   })
   fetchTodo()
 }
+
 // PUT TITLE CHANGE
 async function putTodoTitle(param) {
   const { id, value, done, order } = param
-  const { data } = await axios({
+  const { data } = await request({
     url: `${URL}/${id}`,
     method: 'PUT',
-    headers: {
-      'content-type': 'application/json',
-      apikey: API_KEY,
-      username: USERNAME,
-    },
     data: {
       title: value,
       done: done,
@@ -124,14 +137,7 @@ async function putTodoTitle(param) {
   fetchTodo()
 }
 
-formEl.addEventListener('submit', submitTodo)
-addBtn.addEventListener('submit', submitTodo)
-
-// SELECT INPUT
-selectInput.addEventListener('change', (e) => {
-  order = e.target.value
-})
-// Todo INPUT
+// TODO INPUT
 function submitTodo(e) {
   e.preventDefault()
   // console.log(inputEl.value)
@@ -169,9 +175,9 @@ function sortRenderTodo(todos) {
     }
   })
 }
+
 // TODO RENDER
 function renderTodo(todos) {
-  console.log(todos)
   resetRender()
   todos.map((todo) => {
     const todoItem = document.createElement('li')
@@ -192,7 +198,6 @@ function renderTodo(todos) {
       todoText.classList.toggle('checked')
       boolean = !boolean
       checkBox.setAttribute('checked', boolean)
-      console.log(todo.id, value)
       putTodoBoolean(boolean, todo.id, value, todo.order)
     })
     const renderSelect = document.createElement('div')
@@ -214,7 +219,7 @@ function renderTodo(todos) {
     deleteBtn.setAttribute('class', 'delete-btn')
     deleteBtn.textContent = '삭제'
     const updatedTime = document.createElement('span')
-    updatedTime.textContent = `Date: ${todo.updatedAt.slice(0, 10)}`
+    updatedTime.textContent = `Date: ${todo.updatedAt.slice(2, 16).replace('T', ' ')}`
     todoItem.append(checkBox, todoText, modifyBtn, deleteBtn, renderSelect, updatedTime)
     todoUlEl.appendChild(todoItem)
   })
@@ -222,27 +227,12 @@ function renderTodo(todos) {
   contentList.appendChild(todoUlEl)
 }
 
+// 삭제나 추가 후 새로고침
 function resetRender() {
   todoUlEl.innerHTML = ''
   inputEl.value = ''
 }
 
-// CLICK BTNS
-contentList.addEventListener('click', (e) => {
-  if (e.target.className === 'delete-btn') {
-    console.log(e.target.parentNode)
-    // deleteTodo(e.target.parentNode.id)
-  }
-  if (e.target.className === 'modify-btn') {
-    // 수정 버튼에 대한 이벤트
-    const id = e.target.parentNode.id
-    const value = e.target.value
-    textBoolean = !textBoolean
-    if (textBoolean) {
-      renderModal(id, value)
-    }
-  }
-})
 // RENDER MODAL
 function renderModal(id, value) {
   const modalContainer = document.createElement('div')

@@ -62,10 +62,13 @@ main {
       justify-content: center;
       align-items: center;
       form {
+        padding: 5px;
+        box-shadow: rgba(50, 50, 93, 0.25) 0px 50px 100px -20px,
+          rgba(0, 0, 0, 0.3) 0px 30px 60px -30px, rgba(10, 37, 64, 0.35) 0px -2px 6px 0px inset;
         width: 400px;
         height: 180px;
         margin-top: 30px;
-        border: 1px solid;
+        border: none;
         border-radius: 3px;
         background-color: $backgroundColor;
         .form-title {
@@ -102,6 +105,8 @@ main {
       }
     }
     .content-container {
+      box-shadow: rgba(50, 50, 93, 0.25) 0px 50px 100px -20px,
+        rgba(0, 0, 0, 0.3) 0px 30px 60px -30px, rgba(10, 37, 64, 0.35) 0px -2px 6px 0px inset;
       position: relative;
       width: 400px;
       margin: 30px auto;
@@ -123,6 +128,7 @@ main {
       }
       .content-list {
         margin: 10px;
+
         ul {
           padding: 5px;
           li {
