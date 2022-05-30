@@ -17,6 +17,11 @@ let value
 const URL = 'https://asia-northeast3-heropy-api.cloudfunctions.net/api/todos'
 const API_KEY = 'FcKdtJs202204'
 const USERNAME = 'KDT2_LeeKyungTaek'
+const headers = {
+  'content-type': 'application/json',
+  apikey: API_KEY,
+  username: USERNAME,
+}
 
 // CREATE
 async function createTodo(value) {
@@ -24,11 +29,7 @@ async function createTodo(value) {
   const { data } = await axios({
     url: URL,
     method: 'POST',
-    headers: {
-      'content-type': 'application/json',
-      apikey: API_KEY,
-      username: USERNAME,
-    },
+    headers,
     data: {
       // 시용자의 인풋 값
       title: value.title,
@@ -44,14 +45,9 @@ async function fetchTodo() {
   const { data } = await axios({
     url: URL,
     method: 'GET',
-    headers: {
-      'content-type': 'application/json',
-      apikey: API_KEY,
-      username: USERNAME,
-    },
+    headers,
   })
   renderTodo(data)
-  console.log(data)
   // data.map((item) => {
   //   deleteTodo(item.id)
   // })
@@ -63,14 +59,18 @@ async function deleteTodo(id) {
   const { data } = await axios({
     url: `${URL}/${id}`,
     method: 'DELETE',
-    headers: {
-      'content-type': 'application/json',
-      apikey: API_KEY,
-      username: USERNAME,
-    },
+    headers,
   })
   fetchTodo()
 }
+// DELETE DONE TODO
+/* async function deleteDoneTodo() {
+  await axios ({
+    url: URL,
+    method: 'DELETE',
+    headers,
+  })
+} */
 // PUT done 값
 async function putTodoBoolean(boolean, id, value, order) {
   const { data } = await axios({
@@ -154,6 +154,7 @@ function renderTodo(todos) {
     const modifyBtn = document.createElement('button')
     modifyBtn.setAttribute('class', 'modify-btn')
     modifyBtn.textContent = '수정'
+    modifyBtn.setAttribute('value', value)
     const deleteBtn = document.createElement('button')
     deleteBtn.setAttribute('class', 'delete-btn')
     deleteBtn.textContent = '삭제'
@@ -178,9 +179,7 @@ contentList.addEventListener('click', (e) => {
   }
   if (e.target.className === 'modify-btn') {
     // 수정 버튼에 대한 이벤트
-    const id = e.target.parentNode.id
     textBoolean = !textBoolean
-    console.log(textBoolean, id)
     if (textBoolean) {
       renderModal(id, value)
     }
@@ -200,7 +199,6 @@ function renderModal(id, value) {
   cancelBtn.classList.add('cancel-btn')
   cancelBtn.textContent = '취소'
   modalContainer.append(modalTitle, textArea, confirmBtn, cancelBtn)
-  console.log('rendered')
   textArea.addEventListener('input', (e) => {
     value = e.target.value
   })
@@ -210,6 +208,10 @@ function renderModal(id, value) {
       textBoolean = !textBoolean
     }
     if (e.target.className === 'confirm-btn') {
+      if (textArea.value.length > 10) {
+        alert('투두는 간단하게!')
+        return
+      }
       modalContainer.classList.remove('modal-container')
       textArea.value = value
       textBoolean = !textBoolean
