@@ -10,9 +10,12 @@ const modifyBtn = document.querySelector('.btn__modify')
 const todoUlEl = document.querySelector('.content-list ul')
 const textArea = document.createElement('input')
 const selectInput = document.querySelector('.select-input')
+const sortItem = document.querySelector('.sort-item')
+const deleteAllBtn = document.querySelector('.delete-all')
 
 let order = 1
 let textBoolean = false
+let id
 
 // CONSTANT
 const URL = 'https://asia-northeast3-heropy-api.cloudfunctions.net/api/todos'
@@ -37,7 +40,6 @@ async function createTodo(value) {
       order: value.order,
     },
   })
-  console.log(data) // 추가 한 데이터 화면 todos에 추가
   fetchTodo()
 }
 
@@ -48,8 +50,10 @@ async function fetchTodo() {
     method: 'GET',
     headers,
   })
-  renderTodo(data)
-  console.log(data)
+  id = data.map((item) => {
+    return item.id
+  })
+  sortRenderTodo(data)
   // data.map((item) => {
   //   deleteTodo(item.id)
   // })
@@ -65,15 +69,24 @@ async function deleteTodo(id) {
   })
   fetchTodo()
 }
+
+deleteAllBtn.addEventListener('click', () => {
+  id.forEach((item) => {
+    deleteDoneTodo(item)
+  })
+})
 // DELETE DONE TODO
-/* async function deleteDoneTodo() {
-  await axios ({
-    url: URL,
+async function deleteDoneTodo(id) {
+  // todo id를 받아서 해당 id todo만 삭제
+  const { data } = await axios({
+    url: `${URL}/${id}`,
     method: 'DELETE',
     headers,
   })
-} */
-// PUT done 값
+  fetchTodo()
+}
+
+// PUT DONE VALUE
 async function putTodoBoolean(boolean, id, value, order) {
   const { data } = await axios({
     url: `${URL}/${id}`,
@@ -91,7 +104,7 @@ async function putTodoBoolean(boolean, id, value, order) {
   })
   fetchTodo()
 }
-// PUT title change
+// PUT TITLE CHANGE
 async function putTodoTitle(param) {
   const { id, value, done, order } = param
   const { data } = await axios({
@@ -114,11 +127,11 @@ async function putTodoTitle(param) {
 formEl.addEventListener('submit', submitTodo)
 addBtn.addEventListener('submit', submitTodo)
 
-// SELECT 입력
+// SELECT INPUT
 selectInput.addEventListener('change', (e) => {
   order = e.target.value
 })
-// Todo 입력
+// Todo INPUT
 function submitTodo(e) {
   e.preventDefault()
   // console.log(inputEl.value)
@@ -134,11 +147,33 @@ function submitTodo(e) {
     createTodo(value)
   }
 }
-// todo render
+
+// SORT RENDER TODO
+function sortRenderTodo(todos) {
+  renderTodo(todos)
+  sortItem.addEventListener('change', (e) => {
+    if (e.target.value === '1') {
+      let sortByFalse
+      sortByFalse = todos.filter((todo) => {
+        return todo.done === false
+      })
+      renderTodo(sortByFalse)
+    } else if (e.target.value === '2') {
+      let sortByTrue
+      sortByTrue = todos.filter((todo) => {
+        return todo.done === true
+      })
+      renderTodo(sortByTrue)
+    } else {
+      renderTodo(todos)
+    }
+  })
+}
+// TODO RENDER
 function renderTodo(todos) {
+  console.log(todos)
   resetRender()
   todos.map((todo) => {
-    console.log(todo.order)
     const todoItem = document.createElement('li')
     todoItem.setAttribute('id', todo.id)
     const todoText = document.createElement('div')
@@ -183,6 +218,7 @@ function renderTodo(todos) {
     todoItem.append(checkBox, todoText, modifyBtn, deleteBtn, renderSelect, updatedTime)
     todoUlEl.appendChild(todoItem)
   })
+
   contentList.appendChild(todoUlEl)
 }
 
@@ -191,7 +227,7 @@ function resetRender() {
   inputEl.value = ''
 }
 
-// delete 로직
+// CLICK BTNS
 contentList.addEventListener('click', (e) => {
   if (e.target.className === 'delete-btn') {
     deleteTodo(e.target.parentNode.id)
@@ -206,7 +242,7 @@ contentList.addEventListener('click', (e) => {
     }
   }
 })
-// modal
+// RENDER MODAL
 function renderModal(id, value) {
   const modalContainer = document.createElement('div')
   modalContainer.classList.add('modal', 'modal-container')
