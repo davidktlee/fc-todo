@@ -33,3 +33,17 @@
 [x] 최초 API 요청(Request)에 대한 로딩 애니메이션을 추가해 보세요.
 
 [x] SCSS, Bootstrap 등을 구성해 프로젝트를 최대한 예쁘게(?) 만들어 보세요.
+
+## RESULT
+
+- 배포: [KTO-DO-LIST](https://unique-kashata-2b8ed0.netlify.app/)
+
+## SKILLS
+
+![HTML5](https://img.shields.io/badge/-HTML5-E34F26?style=flat-square&logo=html5&logoColor=white)
+![CSS3](https://img.shields.io/badge/-CSS3-1572B6?style=flat-square&logo=css3)
+![JavaScript](https://img.shields.io/badge/-JavaScript-yellow?style=flat-square&logo=javascript)
+
+## 느낀점
+
+API에 대한 이해도가 조금은 생겼고 프레임워크를 사용해서 만들었을 때 얼마나 코드가 짧아질지 기대가 된다.
