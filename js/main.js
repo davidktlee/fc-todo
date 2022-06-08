@@ -287,9 +287,8 @@ function renderTodo(todos) {
     deleteBtn.setAttribute('class', 'delete-btn')
     deleteBtn.textContent = '삭제'
     const updatedTime = document.createElement('span')
-    const hour = parseInt(todo.updatedAt.slice(12, 13)) + 9
-    const minutes = parseInt(todo.updatedAt.slice(14, 16))
-    updatedTime.textContent = `Date: ${todo.updatedAt.slice(2, 10)} ${hour}:${minutes}`
+    const updatedDate = String(new Date(todo.updatedAt.toLocaleString('ko-KR')))
+    updatedTime.textContent = updatedDate.slice(0, 24)
     todoItem.append(checkBox, todoText, modifyBtn, deleteBtn, renderSelect, updatedTime)
     todoUlEl.appendChild(todoItem)
   })
@@ -356,3 +355,8 @@ function renderModal(id, value) {
 
   contentList.appendChild(modalContainer)
 }
+
+// SORTABLE
+const sortable = Sortable.create(todoUlEl, {
+  animation: 150,
+})
